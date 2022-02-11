@@ -11,26 +11,13 @@ export class IOController extends socketio.Server {
 
   constructor(instance: Instance) {
     super()
-    this.connectMongoAdapter()
-    this.logDisconnect()
     this.testIO()
     this.io = instance.io
     this.db = instance.connection
     instrument(this.io, { auth: false })
   }
 
-  private logDisconnect(): void {
-    this.io.engine.on("connection_error", err => {
-      console.log(err.req)
-      console.log(err.code)
-      console.log(err.message)
-      console.log(err.context)
-    })
-  }
 
-  private connectMongoAdapter(): void {
-    this.io.adapter(createAdapter(this.db.collection<AnyObject>(process.env.SOCKET_COLLECTION)))
-  }
 
   private testIO(): void {
     this.io.on('connection', socket => {
