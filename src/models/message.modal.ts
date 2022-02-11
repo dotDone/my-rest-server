@@ -1,5 +1,5 @@
 import { Model, model, Schema, Types } from "mongoose"
-import { IMessage } from './../interface/message.interface'
+import { IMessage } from '../interfaces/message.interface'
 
 type MessageModelType = Model<IMessage, {}, {}, {}>
 

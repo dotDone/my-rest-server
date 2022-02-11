@@ -1,15 +1,14 @@
-import { ServerToClientEvents, ClientToServerEvents, InterServerEvents, SocketData } from './../interface/io.interface'
+import { ServerToClientEvents, ClientToServerEvents, InterServerEvents, SocketData } from '../interfaces/io.interface'
 import express from "express"
 import * as http from 'http'
-import * as SocketIO from "socket.io"
-
+import * as socketio from "socket.io"
 import cors from "cors"
 
 export class MyServer {
   public static readonly PORT: number = 8080
   private app: express.Application
   private server: http.Server
-  private io: SocketIO.Server
+  private io: socketio.Server
   private port: string | number
 
   constructor() {
@@ -34,7 +33,7 @@ export class MyServer {
   }
 
   private sockets(): void {
-    this.io = new SocketIO.Server<ClientToServerEvents, ServerToClientEvents, InterServerEvents, SocketData>(this.server)
+    this.io = new socketio.Server<ClientToServerEvents, ServerToClientEvents, InterServerEvents, SocketData>(this.server)
   }
 
   private listen(): void {
@@ -45,7 +44,7 @@ export class MyServer {
     return this.app
   }
 
-  public getIo(): SocketIO.Server {
+  public getIo(): socketio.Server {
     return this.io
   }
 

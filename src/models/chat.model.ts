@@ -1,6 +1,6 @@
 import { Model, model, Schema, Types } from "mongoose"
-import { IChat } from './../interface/chat.interface'
-import { IMessage } from './../interface/message.interface'
+import { IChat } from '../interfaces/chat.interface'
+import { IMessage } from '../interfaces/message.interface'
 
 type ChatDocumentOverrides = {
   chatMessages: Types.Subdocument<Types.ObjectId> & IMessage
