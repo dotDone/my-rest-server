@@ -1,61 +1,56 @@
+import { IOController } from './controllers/io.controller'
 import express from "express"
 import * as dotenv from "dotenv"
 import * as socketio from "socket.io"
-import { MyServer } from "./utils/server"
+import { ServerInitialiser } from "./utils/server"
 import { Database } from "./utils/db"
 import { Connection } from "mongoose"
-import { createAdapter } from "@socket.io/mongo-adapter"
+import { ServerToClientEvents, ClientToServerEvents, InterServerEvents, SocketData } from './interfaces/io.interface'
 
-// start server
+
 dotenv.config()
 
-export class Instance {
-  private server: MyServer
+export class Server {
+  public _server: ServerInitialiser
   public connection: Connection
-  public io: socketio.Server
+  public io: socketio.Server<ClientToServerEvents, ServerToClientEvents, InterServerEvents, SocketData>
   public app: express.Application
+
   constructor() {
-    this.startServer()
-    console.log(this.connection)
-    this.logDisconnect()
+    this.setup()
   }
 
-  private async startServer() {
-    this.server = new MyServer()
-    this.io = this.server.getIo()
-    this.app = this.server.getApp()
-    this.connection = await this.getConnection()
+  private async setup(): Promise<void> {
+    await this.startDb().catch(err => { console.log(`${new Date().toTimeString()} : MongoDB | Error establishing connection`); console.log(err) })
+    await this.startServer().catch(err => { console.log(`${new Date().toTimeString()} : Server | Error creating server`); console.log(err) })
+    this.startController()
   }
 
-  private getConnection: () => Promise<Connection> = async (): Promise<Connection> => {
-    return new Database().getDb()
+  private async startServer(): Promise<void> {
+    console.log(`${new Date().toTimeString()} : Server | Building starting...`)
+    this._server = new ServerInitialiser()
+    await this._server.build()
+      .then((e): void => { this.app = e._app; this.io = e._io })
+      .catch(err => console.log(err))
   }
 
-  private connectDbAdapter = async () => {
-    return this.io.adapter(createAdapter(this.connection.collection(process.env.SOCKET_COLLECTION)))
+  private async startDb(): Promise<void> {
+    let db: Database = new Database()
+    await db.connectDb()
+      .then(e => this.connection = e)
+      .catch(err => console.log(err))
   }
 
-  private logDisconnect(): void {
-    this.io.engine.on("connection_error", err => {
-      console.log(err.req)
-      console.log(err.code)
-      console.log(err.message)
-      console.log(err.context)
-    })
+  private async startController(): Promise<void> {
+    await IOController.connectDbAdapter(this.io, this.connection)
+    console.log(`${new Date().toTimeString()} : Adapter | SocketIO x MongoDB adapter created`)
+    IOController.logDisconnect(this.io)
   }
-
-
-
-
 }
 
-const server: Instance = new Instance()
+const server: Server = new Server()
+const controller: IOController = new IOController(server)
 
 export default server
 
 // const ioController = new IOController(server)
-
-server.app.get('/', (req: express.Request, res: express.Response) => {
-  res.setHeader('Content-Type', 'text/html')
-  res.send('<h1>Hello World!</h1>')
-})

@@ -1,38 +1,31 @@
 import { createAdapter } from "@socket.io/mongo-adapter"
-import { instrument } from "@socket.io/admin-ui"
-import { AnyObject, Connection } from "mongoose"
+import { Connection } from "mongoose"
 import * as socketio from "socket.io"
-import { Instance } from "../app"
-import { IUser } from "../interfaces/user.interface"
+import { Server } from "../app"
 export class IOController extends socketio.Server {
 
   private io: socketio.Server
   private db: Connection
 
-  constructor(instance: Instance) {
+  constructor(server: Server) {
     super()
-    this.testIO()
-    this.io = instance.io
-    this.db = instance.connection
-    instrument(this.io, { auth: false })
+    this.io = server.io
+    this.db = server.connection
   }
 
+  public static connectDbAdapter = async (io: socketio.Server, db: Connection) => {
+    console.log(`${new Date().toTimeString()} : Adapter | Creating SocketIO x MongoDB adapter`)
+    return io.adapter(createAdapter(db.collection(process.env.SOCKET_COLLECTION)))
+  }
 
-
-  private testIO(): void {
-    this.io.on('connection', socket => {
-      console.log('User has connected')
-      socket.emit('message', 'Hello from test.')
+  public static logDisconnect(io: socketio.Server): void {
+    console.log(`${new Date().toTimeString()} : SocketIO | Connection error logging started`)
+    io.engine.on("connection_error", (err: { req: any; code: any; message: any; context: any }) => {
+      console.log(err.req)
+      console.log(err.code)
+      console.log(err.message)
+      console.log(err.context)
     })
   }
-
-  public createRoom() {
-
-  }
-
-  public getSockets(user: IUser) {
-
-  }
-
 
 }
