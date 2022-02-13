@@ -23,19 +23,19 @@ export class ServerInitialiser {
   public async build(): Promise<{ _app: express.Application; _io: socketio.Server }> {
     this.app = await this.createApp()
     await this.useCors(this.app)
-    console.log(`${new Date().toTimeString()} : Express | Started`)
+    // console.log(`${new Date().toLocaleDateString()} ${new Date().toLocaleTimeString()} : Express | Started`)
     this.server = await this.createServer(this.app)
-    console.log(`${new Date().toTimeString()} : HTTP | Started`)
+    // console.log(`${new Date().toLocaleDateString()} ${new Date().toLocaleTimeString()} : HTTP | Started`)
     this.io = await this.sockets(this.server)
-    console.log(`${new Date().toTimeString()} : SocketIO | Started`)
+    // console.log(`${new Date().toLocaleDateString()} ${new Date().toLocaleTimeString()} : SocketIO | Started`)
     this.listen()
     const serverData: { _app: express.Application, _io: socketio.Server } = { _app: this.app, _io: this.io }
-    console.log(`${new Date().toTimeString()} : Server | Build complete`)
+    console.log(`${new Date().toLocaleDateString()} ${new Date().toLocaleTimeString()} : Server | Build complete`)
     return serverData
   }
 
   private listen(): void {
-    this.server.listen(this.port, () => console.log(`${new Date().toTimeString()} : Server | Listening on port: ${this.port}`))
+    this.server.listen(this.port, () => console.log(`${new Date().toLocaleDateString()} ${new Date().toLocaleTimeString()} : Server | Listening on port: ${this.port}`))
   }
 
   private createApp = async () => express()

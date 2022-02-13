@@ -8,9 +8,9 @@ export class Database {
   constructor() { }
 
   public async connectDb(): Promise<Connection> {
-    console.log(`${new Date().toTimeString()} : MongoDB | Establishing connection...`)
+    console.log(`${new Date().toLocaleDateString()} ${new Date().toLocaleTimeString()} : MongoDB | Establishing connection...`)
     await connect(this.url, { user: process.env.MONGODB_USERNAME, pass: process.env.MONGODB_PASSWORD, family: 4, })
-    console.log(`${new Date().toTimeString()} : MongoDB | Connection established...`)
+    console.log(`${new Date().toLocaleDateString()} ${new Date().toLocaleTimeString()} : MongoDB | Connection established`)
     this.myDb = connection
     return connection
   }

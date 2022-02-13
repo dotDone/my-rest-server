@@ -1,3 +1,4 @@
+import { IChat } from './chat.interface'
 
 import { Date, Document, Types } from "mongoose"
 
@@ -9,4 +10,5 @@ export interface IUser extends Document {
   readonly dob: Date
   readonly createdOn: Date
   readonly version: number
+  readonly rooms: IChat[]
 }

@@ -9,6 +9,8 @@ type ChatModelType = Model<IChat, {}, ChatDocumentOverrides>
 
 
 export const ChatSchema: Schema = new Schema<IChat, ChatModelType>({
+  namespace: { type: String, required: true },
+  room: { type: String, required: true },
   chatTitle: { type: String, required: true },
   chatParticipants: { type: [String], required: true },
   chatMessages: { type: [String] },

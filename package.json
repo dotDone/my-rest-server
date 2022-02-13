@@ -2,12 +2,12 @@
   "name": "my-rest-server",
   "version": "1.0.0",
   "description": "",
-  "main": "app.ts",
+  "main": "server.ts",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "node .",
-    "start:dev": "tsnd --respawn ./src/app.ts",
-    "compile": "tsc ./src/app.ts -w"
+    "start:dev": "tsnd --respawn ./src/server.ts",
+    "compile": "tsc ./src/server.ts -w"
   },
   "keywords": [],
   "author": "",

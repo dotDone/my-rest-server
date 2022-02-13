@@ -12,7 +12,8 @@ export const UserSchema: Schema = new Schema<IUser, UserModelType>({
   lastName: { type: String, required: true },
   dob: { type: Date, required: true },
   createdOn: { type: Date, required: true },
-  version: { type: Number, required: true }
+  version: { type: Number, required: true },
+  rooms: { type: [String], required: false }
 })
 
 const UserModel: Model<IUser, {}, UserDocumentOverrides, {}> = model('User', UserSchema)

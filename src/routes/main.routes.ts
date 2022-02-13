@@ -1,5 +1,5 @@
 import express from 'express'
-import server from "../app"
+import server from "../server"
 
 const app = server.app
 
