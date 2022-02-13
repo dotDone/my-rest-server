@@ -1,9 +1,9 @@
-import express from 'express'
-import server from "../server"
+import { Router, Request, Response } from 'express'
+const mainRouter: Router = Router()
 
-const app = server.app
-
-app.get('/', (req: express.Request, res: express.Response) => {
+mainRouter.get('/', (req: Request, res: Response): void => {
   res.setHeader('Content-Type', 'text/html')
   res.send('<h1>Hello World!</h1>')
 })
+
+export default mainRouter
