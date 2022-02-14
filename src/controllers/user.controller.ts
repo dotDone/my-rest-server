@@ -2,6 +2,8 @@ import { IUser } from './../interfaces/user.interface'
 import { Request, Response } from "express"
 import UserModel from "../models/user.model"
 import asyncHandler from 'express-async-handler'
+import bcrypt from 'bcryptjs'
+import { Jwt } from 'jsonwebtoken'
 
 // @desc    Get users
 // @route   GET /user
