@@ -26,94 +26,85 @@ export const getUsers = asyncHandler(async (req: Request, res: Response): Promis
 // @route   POST /user
 // @access  Private
 export const createUser = asyncHandler(async (req: Request, res: Response): Promise<void> => {
-  let _firstName: string, _lastName: string, _username: string, _dob: Date, _password: string
 
-  if (!req.body.username || req.body.username == '') {
+  const { username, firstName, lastName, email, password, dob, } = req.body
+
+  if (!username || !firstName || !lastName || !password || !dob || !email) {
     res.status(400)
-    throw new Error('Valid username required')
-  } else {
-    _username = req.body.username
-  }
-
-  if (!req.body.firstname || req.body.firstname == '') {
-    res.status(400)
-    throw new Error('Valid firstname required')
-  } else {
-    _firstName = req.body.firstname
-  }
-
-  if (!req.body.lastname || req.body.lastname == '') {
-    res.status(400)
-    throw new Error('Valid firstname required')
-  } else {
-    _lastName = req.body.lastname
-  }
-
-  if (!req.body.password || req.body.password == '') {
-    res.status(400)
-    throw new Error('Valid password required')
-  } else {
-    _password = req.body.password
-  }
-
-  if (!req.body.dob || req.body.dob == '') {
-    res.status(400)
-    throw new Error('Valid Date of Birth required')
-  } else {
-    _dob = new Date(req.body.dob)
-  }
-
-  let newUser: IUser = {
-    username: _username,
-    firstName: _firstName,
-    lastName: _lastName,
-    password: _password,
-    dob: _dob,
-    version: 1
+    throw new Error('All fields required')
   }
 
   try {
+    const checkUserExists = await UserModel.find({ email: email }, {}, { rawResult: true })
+
+    if (checkUserExists) {
+      res.status(400)
+      throw new Error('User already exists')
+    }
+
+    const checkUsername = await UserModel.find({ username: username }, {}, { rawResult: true })
+
+    if (checkUsername) {
+      res.status(400)
+      throw new Error('Username is taken')
+    }
+
+    let newUser: IUser = {
+      username: username,
+      firstName: firstName,
+      lastName: lastName,
+      email: email,
+      password: password,
+      dob: dob,
+      version: 1
+    }
+
     const user = await UserModel.create(newUser)
     res.status(200).json({ message: 'User created successfully', user })
   } catch (err) {
     res.status(500).json({ message: 'Create user failed', err })
   }
-
 })
 
 // @desc    Update user
 // @route   PUT /user
 // @access  Private
 export const editUser = asyncHandler(async (req: Request, res: Response): Promise<void> => {
-  if (!req.body.id) {
+
+  const { id, username, firstName, lastName, email, password, dob } = req.body
+
+  if (!id) {
     res.status(400)
     throw new Error('Valid user ID required')
-
   }
 
   let userEdits: Object[] = []
 
-  if (req.body.username) {
-    userEdits.push({ $set: { "username": req.body.username } })
+  if (username) {
+    userEdits.push({ $set: { "username": username } })
   }
 
-  if (req.body.firstname) {
-    userEdits.push({ $set: { "firstName": req.body.firstname } })
+  if (firstName) {
+    userEdits.push({ $set: { "firstName": firstName } })
   }
 
-  if (req.body.lastname) {
-    userEdits.push({ $set: { "lastName": req.body.lastname } })
+  if (lastName) {
+    userEdits.push({ $set: { "lastName": lastName } })
   }
 
-  if (req.body.password) {
-    userEdits.push({ $set: { "password": req.body.password } })
+  if (email) {
+    userEdits.push({ $set: { "email": email } })
   }
 
-  if (req.body.dob) {
-    userEdits.push({ $set: { "dob": new Date(req.body.dob) } })
+  if (password) {
+    userEdits.push({ $set: { "password": password } })
   }
 
-  console.log(req.body.id, userEdits)
+  if (dob) {
+    userEdits.push({ $set: { "dob": new Date(dob) } })
+  }
+
+  console.log(id, userEdits)
 
   try {
     const user = await UserModel.findByIdAndUpdate(req.body.id, userEdits, { new: true })
