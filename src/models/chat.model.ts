@@ -7,17 +7,16 @@ type ChatDocumentOverrides = {
 }
 type ChatModelType = Model<IChat, {}, ChatDocumentOverrides>
 
-
 export const ChatSchema: Schema = new Schema<IChat, ChatModelType>({
   namespace: { type: String, required: true },
   room: { type: String, required: true },
   chatTitle: { type: String, required: true },
-  chatParticipants: { type: [String], required: true },
-  chatMessages: { type: [String] },
+  chatParticipants: { type: [Schema.Types.ObjectId], required: true, ref: 'User' },
+  chatMessages: { type: [Schema.Types.ObjectId], ref: 'Message' },
   createdOn: { type: Date, required: true },
-  createdBy: { type: Types.ObjectId, required: true },
+  createdBy: { type: Schema.Types.ObjectId, required: true },
   closedOn: { type: Date },
-  closedBy: { type: String }
+  closedBy: { type: Schema.Types.ObjectId }
 })
 
 const ChatModel: Model<IChat, {}, ChatDocumentOverrides, {}> = model('Chat', ChatSchema)
