@@ -4,6 +4,5 @@ export interface IMessage extends Document {
   readonly _id: Types.ObjectId
   readonly chatId: Types.ObjectId
   readonly sender: Types.ObjectId
-  readonly timestamp: Date
   readonly messageContent: string
 }

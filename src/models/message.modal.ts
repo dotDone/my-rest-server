@@ -6,9 +6,8 @@ type MessageModelType = Model<IMessage, {}, {}, {}>
 export const MessageSchema: Schema = new Schema<IMessage, MessageModelType>({
   chatId: { type: Schema.Types.ObjectId, required: true },
   sender: { type: Schema.Types.ObjectId, required: true },
-  timestamp: { type: Date, required: true },
   messageContent: { type: String, required: true }
-})
+}, { timestamps: true })
 
 const MessageModel: Model<IMessage> = model('Message', MessageSchema)
 

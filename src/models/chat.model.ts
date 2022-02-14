@@ -1,3 +1,4 @@
+import { Timestamp } from "mongodb"
 import { Model, model, Schema, Types } from "mongoose"
 import { IChat } from '../interfaces/chat.interface'
 import { IMessage } from '../interfaces/message.interface'
@@ -13,11 +14,10 @@ export const ChatSchema: Schema = new Schema<IChat, ChatModelType>({
   chatTitle: { type: String, required: true },
   chatParticipants: { type: [Schema.Types.ObjectId], required: true, ref: 'User' },
   chatMessages: { type: [Schema.Types.ObjectId], ref: 'Message' },
-  createdOn: { type: Date, required: true },
   createdBy: { type: Schema.Types.ObjectId, required: true },
   closedOn: { type: Date },
   closedBy: { type: Schema.Types.ObjectId }
-})
+}, { timestamps: true })
 
 const ChatModel: Model<IChat, {}, ChatDocumentOverrides, {}> = model('Chat', ChatSchema)
 

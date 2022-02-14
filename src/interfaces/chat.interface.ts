@@ -7,7 +7,6 @@ export interface IChat extends Document {
   readonly chatTitle: string
   readonly chatParticipants: Types.ObjectId[]
   readonly chatMessages?: Types.ObjectId[]
-  readonly createdOn: Date
   readonly createdBy: Types.ObjectId
   readonly closedOn?: Date
   readonly closedBy?: Types.ObjectId
