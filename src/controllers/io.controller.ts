@@ -8,7 +8,7 @@ import UserModel from '../models/user.model'
 import ChatModel from '../models/chat.model'
 
 
-class IOController {
+export class IOController {
   // Variables
   private io: socketio.Server<ClientToServerEvents, ServerToClientEvents, InterServerEvents, SocketData>
   private db: Connection
@@ -61,6 +61,4 @@ class IOController {
     }
   }
 }
-
-export default IOController
 

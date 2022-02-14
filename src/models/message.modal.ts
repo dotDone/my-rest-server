@@ -4,11 +4,10 @@ import { IMessage } from '../interfaces/message.interface'
 type MessageModelType = Model<IMessage, {}, {}, {}>
 
 export const MessageSchema: Schema = new Schema<IMessage, MessageModelType>({
-  chatId: { type: Types.ObjectId, required: true },
-  sender: { type: Types.ObjectId, required: true },
+  chatId: { type: Schema.Types.ObjectId, required: true },
+  sender: { type: Schema.Types.ObjectId, required: true },
   timestamp: { type: Date, required: true },
   messageContent: { type: String, required: true }
-
 })
 
 const MessageModel: Model<IMessage> = model('Message', MessageSchema)
