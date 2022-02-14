@@ -7,26 +7,17 @@ import asyncHandler from 'express-async-handler'
 // @route   GET /user
 // @access  Private
 export const getUsers = asyncHandler(async (req: Request, res: Response): Promise<void> => {
-  const results = await UserModel.find()
-  const jsonResults = []
-  results.forEach(e => jsonResults.push(e.toJSON()))
-  res.status(200).json(jsonResults)
-})
-
-// @desc    Get user
-// @route   GET /user/:id
-// @access  Private
-export const getUser = asyncHandler(async (req: Request, res: Response): Promise<void> => {
-  if (!req.params.id) {
-    res.status(400)
-    throw new Error('User ID required')
+  if (req.body.id) {
+    try {
+      const user = await UserModel.findById(req.body.id)
+      res.status(200).json({ message: 'Success!!', user })
+    } catch (err) {
+      res.status(400).json({ message: `Couldn't find user`, err })
+    }
   }
 
-  await UserModel.findById(req.params.id, {}, {}, (err, user): void => {
-    err ? res.status(400).json({ message: `Couldn't find user`, err }) : res.status(200).json({ message: 'Success!!', user })
-  }).clone()
-
-  // REMOVE .clone()
+  const results = await UserModel.find()
+  res.status(200).json(results)
 })
 
 // @desc    Create user
@@ -79,17 +70,26 @@ export const createUser = asyncHandler(async (req: Request, res: Response): Prom
     version: 1
   }
 
-  UserModel.create(newUser, (err, user): void => {
-    err ? res.status(500).json({ message: 'Create user failed', err }) : res.status(200).json({ message: 'User created successfully', user })
-  })
+  try {
+    const user = await UserModel.create(newUser)
+    res.status(200).json({ message: 'User created successfully', user })
+  } catch (err) {
+    res.status(500).json({ message: 'Create user failed', err })
+  }
+
 })
 
 // @desc    Update user
-// @route   PUT /user/:id
+// @route   PUT /user
 // @access  Private
 export const editUser = asyncHandler(async (req: Request, res: Response): Promise<void> => {
+  if (!req.body.id) {
+    res.status(400)
+    throw new Error('Valid user ID required')
 
-  let userEdits = []
+  }
+
+  let userEdits: Object[] = []
 
   if (req.body.username) {
     userEdits.push({ $set: { "username": req.body.username } })
@@ -111,17 +111,31 @@ export const editUser = asyncHandler(async (req: Request, res: Response): Promis
     userEdits.push({ $set: { "dob": new Date(req.body.dob) } })
   }
 
-  console.log(req.params.id, userEdits)
+  console.log(req.body.id, userEdits)
 
-  await UserModel.findByIdAndUpdate(req.params.id, userEdits, { new: true }, (err, user) => {
-    err ? res.status(400).json({ message: 'Could not update user', err }) : res.status(200).json({ message: `Update User ${req.params.id} successfully`, user })
-  }).clone()
+  try {
+    const user = await UserModel.findByIdAndUpdate(req.body.id, userEdits, { new: true })
+    res.status(200).json({ message: `Update User ${req.body.id} successfully`, user })
+  } catch (err) {
+    res.status(400).json({ message: 'Could not update user', err })
+  }
 })
 
 // @desc    Delete user
-// @route   DELETE /user/:id
+// @route   DELETE /user
 // @access  Private
 export const deleteUser = async (req: Request, res: Response): Promise<void> => {
-  res.status(200).json({ message: `Delete User ${req.params.id}` })
+
+  if (!req.body.id) {
+    res.status(400)
+    throw new Error('Valid user ID required')
+  }
+
+  try {
+    const user = await UserModel.findByIdAndDelete(req.body.id)
+    res.status(200).json({ message: `Deleted User ${req.body.id} successfully`, user })
+  } catch (err) {
+    res.status(400).json({ message: 'Could not delete user', err })
+  }
 }
 
