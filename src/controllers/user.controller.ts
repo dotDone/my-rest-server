@@ -92,26 +92,26 @@ export const editUser = asyncHandler(async (req: Request, res: Response): Promis
   let userEdits = []
 
   if (req.body.username) {
-    userEdits.push({ username: req.body.username })
+    userEdits.push({ $set: { "username": req.body.username } })
   }
 
   if (req.body.firstname) {
-    userEdits.push({ firstName: req.body.firstname })
+    userEdits.push({ $set: { "firstName": req.body.firstname } })
   }
 
   if (req.body.lastname) {
-    userEdits.push({ lastName: req.body.lastname })
+    userEdits.push({ $set: { "lastName": req.body.lastname } })
   }
 
   if (req.body.password) {
-    userEdits.push({ password: req.body.password })
+    userEdits.push({ $set: { "password": req.body.password } })
   }
 
   if (req.body.dob) {
-    userEdits.push({ dob: new Date(req.body.dob) })
+    userEdits.push({ $set: { "dob": new Date(req.body.dob) } })
   }
 
-  console.log(userEdits)
+  console.log(req.params.id, userEdits)
 
   await UserModel.findByIdAndUpdate(req.params.id, userEdits, { new: true }, (err, user) => {
     err ? res.status(400).json({ message: 'Could not update user', err }) : res.status(200).json({ message: `Update User ${req.params.id} successfully`, user })
