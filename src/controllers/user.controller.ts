@@ -1,9 +1,10 @@
-import { IUser } from './../interfaces/user.interface'
 import { Request, Response } from "express"
-import UserModel from "../models/user.model"
 import asyncHandler from 'express-async-handler'
 import bcrypt from 'bcryptjs'
-import { Jwt } from 'jsonwebtoken'
+
+import { IUser } from './../interfaces/user.interface'
+import { IGetUserAuthInfoRequest, RoutesController } from "./routes.controller"
+import UserModel from "../models/user.model"
 
 // @desc    Get users
 // @route   GET /user
@@ -34,35 +35,39 @@ export const createUser = asyncHandler(async (req: Request, res: Response): Prom
     throw new Error('All fields required')
   }
 
+  const checkUserExists = await UserModel.find({ email: email }, {}, { rawResult: true })
+
+  if (checkUserExists.length !== 0) {
+    throw new Error('User already exists')
+  }
+
+
+  const checkUsername = await UserModel.find({ username: username }, {}, { rawResult: true })
+
+  console.log(checkUsername)
+
+  if (checkUsername.length !== 0) {
+    throw new Error('Username is taken')
+  }
+
+  const salt = await bcrypt.genSalt(10)
+  const hashedPassword = await bcrypt.hash(password, salt)
+
+  let newUser: IUser = {
+    username: username,
+    firstName: firstName,
+    lastName: lastName,
+    email: email,
+    password: hashedPassword,
+    dob: dob,
+    version: 1
+  }
+
   try {
-    const checkUserExists = await UserModel.find({ email: email }, {}, { rawResult: true })
-
-    if (checkUserExists) {
-      res.status(400)
-      throw new Error('User already exists')
-    }
-
-    const checkUsername = await UserModel.find({ username: username }, {}, { rawResult: true })
-
-    if (checkUsername) {
-      res.status(400)
-      throw new Error('Username is taken')
-    }
-
-    let newUser: IUser = {
-      username: username,
-      firstName: firstName,
-      lastName: lastName,
-      email: email,
-      password: password,
-      dob: dob,
-      version: 1
-    }
-
     const user = await UserModel.create(newUser)
-    res.status(200).json({ message: 'User created successfully', user })
+    res.status(201).json({ message: 'User created successfully', username: user.username, token: RoutesController.generateToken(user._id) })
   } catch (err) {
-    res.status(500).json({ message: 'Create user failed', err })
+    res.status(500).json({ message: 'User create failed', err })
   }
 })
 
@@ -117,7 +122,7 @@ export const editUser = asyncHandler(async (req: Request, res: Response): Promis
 // @desc    Delete user
 // @route   DELETE /user
 // @access  Private
-export const deleteUser = async (req: Request, res: Response): Promise<void> => {
+export const deleteUser = asyncHandler(async (req: Request, res: Response): Promise<void> => {
 
   if (!req.body.id) {
     res.status(400)
@@ -130,5 +135,11 @@ export const deleteUser = async (req: Request, res: Response): Promise<void> => 
   } catch (err) {
     res.status(400).json({ message: 'Could not delete user', err })
   }
-}
+})
 
+// @desc    Get me
+// @route   GET /user/me
+// @access  Private
+export const getMe = asyncHandler(async (req: IGetUserAuthInfoRequest, res: Response): Promise<void> => {
+  res.status(200).json(req.user)
+})
