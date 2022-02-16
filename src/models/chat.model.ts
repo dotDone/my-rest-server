@@ -1,7 +1,18 @@
 import { Timestamp } from "mongodb"
 import { Model, model, Schema, Types } from "mongoose"
-import { IChat } from '../interfaces/chat.interface'
-import { IMessage } from '../interfaces/message.interface'
+import { IMessage } from "./message.modal"
+
+export interface IChat {
+  readonly _id: Types.ObjectId
+  readonly namespace: string
+  readonly room: String
+  readonly chatTitle: string
+  readonly chatParticipants: Types.ObjectId[]
+  readonly chatMessages?: Types.ObjectId[]
+  readonly createdBy: Types.ObjectId
+  readonly closedOn?: Date
+  readonly closedBy?: Types.ObjectId
+}
 
 type ChatDocumentOverrides = {
   chatMessages: Types.Subdocument<Types.ObjectId> & IMessage

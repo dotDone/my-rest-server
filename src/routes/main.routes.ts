@@ -1,9 +1,16 @@
-import { Router, Request, Response } from 'express'
-const mainRouter: Router = Router()
+import { Application, Request, Response } from "express"
 
-mainRouter.get('/', (req: Request, res: Response): void => {
-  res.setHeader('Content-Type', 'text/html')
-  res.send('<h1>Hello World!</h1>')
-})
+export default class MainRoutes {
+  private app: Application
+  constructor(app: Application) {
+    this.app = app
+    this.initMainRoutes()
+  }
 
-export default mainRouter
+  private initMainRoutes() {
+    this.app.get('/', (req: Request, res: Response): void => {
+      res.setHeader('Content-Type', 'text/html')
+      res.send('<h1>Hello World!</h1>')
+    })
+  }
+}
