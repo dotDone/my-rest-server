@@ -1,65 +1,55 @@
-import express from "express"
-import { Connection, connect, connection } from "mongoose"
-const dotenv = require('dotenv').config()
-import * as socketio from "socket.io"
+import express from 'express'
+import { Connection, connections, connect } from 'mongoose'
+import * as socketio from 'socket.io'
 import * as http from 'http'
-import cors from "cors"
-import bodyParser from "body-parser"
+import cors from 'cors'
+import bodyParser from 'body-parser'
+import * as dotenv from "dotenv"
 
-// Interfaces
 import { ServerToClientEvents, ClientToServerEvents, InterServerEvents, SocketData } from './interfaces/io.interface'
-
-// Controllers
-import { DBController } from './controllers/db.controller'
 import { RoutesController } from './controllers/routes.controller'
 import { IOController } from './controllers/io.controller'
+import { DBController } from './controllers/db.controller'
 
-export class Server {
+dotenv.config()
 
-  // Variables
-  private url: string = `mongodb+srv://${process.env.MONGODB_ADDRESS}${process.env.MONGODB_DB}?retryWrites=true&w=majority`
-  private PORT: string | number = process.env.PORT || 5000
-  public db: Connection
-  public app: express.Application
-  public server: http.Server
-  public io: socketio.Server<ClientToServerEvents, ServerToClientEvents, InterServerEvents, SocketData>
-  public socketController: IOController
-  public dbController: DBController
-  public routesController: RoutesController
+const url: string = `mongodb+srv://${process.env.MONGODB_ADDRESS}${process.env.MONGODB_DB}?retryWrites=true&w=majority`
 
-  constructor() {
-    this.startServer().then(() => this.startControllers()).catch(err => console.log(err))
-  }
+const PORT: string | number = process.env.PORT || 5000
 
-  // Private functions
-  private startServer: () => Promise<void> = async (): Promise<void> => {
-    this.app = express()
-    console.log(`${new Date().toLocaleDateString()} ${new Date().toLocaleTimeString()} : Express | Application created`)
-    this.app.use(cors())
-    this.app.use(bodyParser.urlencoded({ extended: false }))
-    this.app.use(RoutesController.errorHandler)
-    console.log(`${new Date().toLocaleDateString()} ${new Date().toLocaleTimeString()} : Express | Registered middleware`)
-    this.server = http.createServer(this.app)
-    console.log(`${new Date().toLocaleDateString()} ${new Date().toLocaleTimeString()} : HTTP | Server started`)
-    this.io = new socketio.Server<ClientToServerEvents, ServerToClientEvents, InterServerEvents, SocketData>(this.server)
-    console.log(`${new Date().toLocaleDateString()} ${new Date().toLocaleTimeString()} : Socket | Server created`)
-    await this.server.listen(this.PORT, () => console.log(`${new Date().toLocaleDateString()} ${new Date().toLocaleTimeString()} : Server | Listening on port ${this.PORT}`))
-    console.log(`${new Date().toLocaleDateString()} ${new Date().toLocaleTimeString()} : DB | Establishing connection...`)
-    await connect(this.url, { user: process.env.MONGODB_USERNAME, pass: process.env.MONGODB_PASSWORD, family: 4, })
+const server = async () => {
+  const app: express.Application = express()
+  console.log(`${new Date().toLocaleDateString()} ${new Date().toLocaleTimeString()} : Server | Server starting...`)
+  app.use(cors())
+
+  app.use(bodyParser.urlencoded({ extended: true }))
+
+  const server: http.Server = http.createServer(app)
+
+  const io: socketio.Server = new socketio.Server<ClientToServerEvents, ServerToClientEvents, InterServerEvents, SocketData>(server)
+
+  console.log(`${new Date().toLocaleDateString()} ${new Date().toLocaleTimeString()} : Server | Server started`)
+
+  server.listen(PORT, () => console.log(`${new Date().toLocaleDateString()} ${new Date().toLocaleTimeString()} : Server | Listening on port ${PORT}`))
+
+  let db: Connection
+
+  try {
+    console.log(`${new Date().toLocaleDateString()} ${new Date().toLocaleTimeString()} : DB | Connecting to MongoDB...`)
+    await connect(url, { user: process.env.MONGODB_USERNAME, pass: process.env.MONGODB_PASSWORD, family: 4, })
+    db = connections[0]
     console.log(`${new Date().toLocaleDateString()} ${new Date().toLocaleTimeString()} : DB | Connection established`)
-    this.db = connection
+  } catch (err) {
+    console.log(err)
   }
 
-  private startControllers(): void {
-    this.socketController = new IOController(this.io, this.db)
-    console.log(`${new Date().toLocaleDateString()} ${new Date().toLocaleTimeString()} : Controller | Created IO Controller`)
-    this.dbController = new DBController(this.db, this.io)
-    console.log(`${new Date().toLocaleDateString()} ${new Date().toLocaleTimeString()} : Controller | Created DB Controller`)
-    this.routesController = new RoutesController(this.app)
-    console.log(`${new Date().toLocaleDateString()} ${new Date().toLocaleTimeString()} : Controller | Created Routes Controller`)
-  }
+  console.log(`${new Date().toLocaleDateString()} ${new Date().toLocaleTimeString()} : Controller | Creating controllers...`)
+  const routesController: RoutesController = new RoutesController(app)
+  const ioController: IOController = new IOController(io, db)
+  const dbController: DBController = new DBController(db, io)
+  console.log(`${new Date().toLocaleDateString()} ${new Date().toLocaleTimeString()} : Controller | Controllers ready`)
+
+  return { app, io, db }
 }
 
-const server: Server = new Server()
-
-export default server
+server()
