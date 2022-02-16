@@ -1,5 +1,11 @@
-import { Model, model, Schema, Types } from "mongoose"
-import { IMessage } from '../interfaces/message.interface'
+import { Model, model, Schema, Types, Date } from "mongoose"
+
+export interface IMessage {
+  readonly _id: Types.ObjectId
+  readonly chatId: Types.ObjectId
+  readonly sender: Types.ObjectId
+  readonly messageContent: string
+}
 
 type MessageModelType = Model<IMessage, {}, {}, {}>
 
