@@ -1,14 +1,19 @@
-import { Model, model, Schema, Types } from "mongoose"
-import { IMessage } from '../interfaces/message.interface'
+import { Model, model, Schema, Types, Date } from "mongoose"
+
+export interface IMessage {
+  readonly _id: Types.ObjectId
+  readonly chatId: Types.ObjectId
+  readonly sender: Types.ObjectId
+  readonly messageContent: string
+}
 
 type MessageModelType = Model<IMessage, {}, {}, {}>
 
 export const MessageSchema: Schema = new Schema<IMessage, MessageModelType>({
   chatId: { type: Schema.Types.ObjectId, required: true },
   sender: { type: Schema.Types.ObjectId, required: true },
-  timestamp: { type: Date, required: true },
   messageContent: { type: String, required: true }
-})
+}, { timestamps: true })
 
 const MessageModel: Model<IMessage> = model('Message', MessageSchema)
 

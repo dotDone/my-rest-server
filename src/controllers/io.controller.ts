@@ -1,10 +1,8 @@
-import { IChat } from './../interfaces/chat.interface'
-import { IUser } from './../interfaces/user.interface'
 import { createAdapter } from "@socket.io/mongo-adapter"
-import { Connection, Types } from "mongoose"
+import { Connection } from "mongoose"
 import * as socketio from "socket.io"
 import { ServerToClientEvents, ClientToServerEvents, InterServerEvents, SocketData } from '../interfaces/io.interface'
-import UserModel from '../models/user.model'
+import { IUser } from '../models/user.model'
 import ChatModel from '../models/chat.model'
 
 
